@@ -1,0 +1,16 @@
+server:
+  port: ${PORT}
+
+postgres:
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  database: ${DB_NAME}
+  sslmode: ${DB_SSLMODE}
+  timezone: ${TIMEZONE}
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT}
+  
