@@ -7,21 +7,21 @@ import (
 )
 
 type CreateTransactionResponse struct {
-	ID            uuid.UUID
-	CustomerName  string
-	ProductName   string
-	ProductSize   string
-	ProductFlavor string
-	Quantity      int
-	CreatedAt     time.Time
+	ID            uuid.UUID `json:"id"`
+	CustomerName  string    `json:"customer_name"`
+	ProductName   string    `json:"product_name"`
+	ProductSize   string    `json:"product_size"`
+	ProductFlavor string    `json:"product_flavor"`
+	Quantity      int       `json:"quantity"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type GetTransactionResponse struct {
-	ID            uuid.UUID
-	CustomerName  string
-	ProductName   string
-	ProductSize   string
-	ProductFlavor string
-	Quantity      int
-	CreatedAt     time.Time
+	ID            uuid.UUID `json:"id"`
+	CustomerName  string    `json:"customer_name"`
+	ProductName   string    `json:"product_name"`
+	ProductSize   string    `json:"product_size"`
+	ProductFlavor string    `json:"product_flavor"`
+	Quantity      int       `json:"quantity"`
+	CreatedAt     time.Time `json:"created_at"`
 }

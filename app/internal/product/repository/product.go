@@ -18,6 +18,15 @@ func NewProductRepository(db *gorm.DB) interfaces.ProductRepository {
 	return &ProductRepositoryImpl{DB: db}
 }
 
+func (p *ProductRepositoryImpl) GetProductByName(ctx context.Context, name string) (*models.Product, error) {
+	var product models.Product
+	err := p.DB.WithContext(ctx).Find(&product, "name = ?", name).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
 func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, error) {
 	var products []models.Product
 	err := p.DB.WithContext(ctx).Find(&products, "manufacture_date = ?", manufactureDate).Error

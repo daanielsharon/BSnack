@@ -13,7 +13,7 @@ type TransactionHandlerImpl struct {
 	TransactionUseCase interfaces.TransactionUseCase
 }
 
-func NewTransactionHandler(transactionUseCase interfaces.TransactionUseCase) interfaces.TransactionHandler {
+func NewTransactionHandler(transactionUseCase interfaces.TransactionUseCase, productUseCase interfaces.ProductUseCase) interfaces.TransactionHandler {
 	return &TransactionHandlerImpl{
 		TransactionUseCase: transactionUseCase,
 	}

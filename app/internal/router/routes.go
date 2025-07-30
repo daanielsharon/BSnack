@@ -18,13 +18,13 @@ import (
 func NewRouter(DB *gorm.DB, redisClient *redis.Client) chi.Router {
 	r := commonrouter.New()
 
-	customerRepository := customer_repository.NewCustomerRepository(DB)
-	customerUseCase := customer_usecase.NewCustomerUseCase(customerRepository)
-	customerHandler := customer_handler.NewCustomerHandler(customerUseCase)
-
 	productRepository := product_repository.NewProductRepository(DB)
 	productUseCase := product_usecase.NewProductUseCase(productRepository)
 	productHandler := product_handler.NewProductHandler(productUseCase)
+
+	customerRepository := customer_repository.NewCustomerRepository(DB)
+	customerUseCase := customer_usecase.NewCustomerUseCase(customerRepository, productUseCase)
+	customerHandler := customer_handler.NewCustomerHandler(customerUseCase)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/v1", v1.Routes(v1.Router{

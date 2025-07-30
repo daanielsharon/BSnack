@@ -8,6 +8,7 @@ import (
 )
 
 type CustomerHandler interface {
+	CreatePointRedemption(w http.ResponseWriter, r *http.Request)
 	GetCustomers(w http.ResponseWriter, r *http.Request)
 	GetCustomerByName(w http.ResponseWriter, r *http.Request)
 	CreateCustomer(w http.ResponseWriter, r *http.Request)
@@ -17,10 +18,13 @@ type CustomerUseCase interface {
 	GetCustomers(ctx context.Context) (*[]dto.GetCustomerResponse, error)
 	GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error)
 	CreateCustomer(ctx context.Context, customer *dto.CreateCustomerRequest) (*dto.CreateCustomerResponse, error)
+	CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error)
 }
 
 type CustomerRepository interface {
 	GetCustomers(ctx context.Context) (*[]models.Customer, error)
 	GetCustomerByName(ctx context.Context, name string) (*models.Customer, error)
 	CreateCustomer(ctx context.Context, customer *models.Customer) (*models.Customer, error)
+	CreatePointRedemption(ctx context.Context, pointRedemption *models.PointRedemption) (*models.PointRedemption, error)
+	UpdateCustomerPoints(ctx context.Context, customer *models.Customer) (*models.Customer, error)
 }

@@ -19,6 +19,10 @@ func NewProductUseCase(productRepository interfaces.ProductRepository) interface
 	}
 }
 
+func (p *ProductUseCaseImpl) GetProductByName(ctx context.Context, name string) (*models.Product, error) {
+	return p.productRepository.GetProductByName(ctx, name)
+}
+
 func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]dto.GetProductResponse, error) {
 	products, err := p.productRepository.GetProductsByManufactureDate(ctx, manufactureDate)
 	if err != nil {

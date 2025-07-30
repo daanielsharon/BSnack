@@ -22,7 +22,7 @@ func NewCustomerHandler(customerUseCase interfaces.CustomerUseCase) interfaces.C
 func (c *CustomerHandlerImpl) GetCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, err := c.CustomerUseCase.GetCustomers(r.Context())
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get customers", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
@@ -33,7 +33,7 @@ func (c *CustomerHandlerImpl) GetCustomerByName(w http.ResponseWriter, r *http.R
 	name := r.URL.Query().Get("name")
 	customer, err := c.CustomerUseCase.GetCustomerByName(r.Context(), name)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get customer", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
@@ -55,9 +55,31 @@ func (c *CustomerHandlerImpl) CreateCustomer(w http.ResponseWriter, r *http.Requ
 
 	createdCustomer, err := c.CustomerUseCase.CreateCustomer(r.Context(), &customer)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to create customer", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
 	httphelper.JSONResponse(w, http.StatusOK, "Customer created successfully", createdCustomer)
+}
+
+func (c *CustomerHandlerImpl) CreatePointRedemption(w http.ResponseWriter, r *http.Request) {
+	var pointRedemption dto.CreatePointRedemptionRequest
+	err := json.NewDecoder(r.Body).Decode(&pointRedemption)
+	if err != nil {
+		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid point redemption data", nil)
+		return
+	}
+
+	if err := validation.Validate.Struct(pointRedemption); err != nil {
+		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid point redemption data", nil)
+		return
+	}
+
+	createdPointRedemption, err := c.CustomerUseCase.CreatePointRedemption(r.Context(), &pointRedemption)
+	if err != nil {
+		httphelper.HandleError(w, err)
+		return
+	}
+
+	httphelper.JSONResponse(w, http.StatusOK, "Point redemption created successfully", createdPointRedemption)
 }

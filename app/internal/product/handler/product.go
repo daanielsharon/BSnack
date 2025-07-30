@@ -7,19 +7,17 @@ import (
 	"bsnack/app/pkg/validation"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type ProductHandlerImpl struct {
 	ProductUseCase interfaces.ProductUseCase
 }
 
-func NewProductHandler(clientUseCase interfaces.ProductUseCase) interfaces.ProductHandler {
+func NewProductHandler(productUseCase interfaces.ProductUseCase) interfaces.ProductHandler {
 	return &ProductHandlerImpl{
-		ProductUseCase: clientUseCase,
+		ProductUseCase: productUseCase,
 	}
 }
 
@@ -58,12 +56,10 @@ func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	cases := cases.Title(language.Indonesian)
-
-	product.Name = cases.String(product.Name)
-	product.Type = cases.String(product.Type)
-	product.Flavor = cases.String(product.Flavor)
-	product.Size = cases.String(product.Size)
+	product.Name = strings.ToLower(product.Name)
+	product.Type = strings.ToLower(product.Type)
+	product.Flavor = strings.ToLower(product.Flavor)
+	product.Size = strings.ToLower(product.Size)
 
 	createdProduct, err := p.ProductUseCase.CreateProduct(r.Context(), &product)
 	if err != nil {

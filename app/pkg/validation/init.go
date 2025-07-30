@@ -16,21 +16,21 @@ func Init() {
 		_, err := time.Parse("2006-01-02", fl.Field().String())
 		return err == nil
 	})
-	Validate.RegisterValidation("size", func(fl validator.FieldLevel) bool {
+	Validate.RegisterValidation("product_size", func(fl validator.FieldLevel) bool {
 		value := strings.ToLower(fl.Field().String())
 		allowedValues := []string{"small", "medium", "large"}
 		return slices.Contains(allowedValues, value)
 	})
-	Validate.RegisterValidation("flavor", func(fl validator.FieldLevel) bool {
+	Validate.RegisterValidation("product_flavor", func(fl validator.FieldLevel) bool {
 		value := strings.ToLower(fl.Field().String())
 		allowedValues := []string{"jagung bakar", "rumput laut", "original", "jagung manis", "keju asin", "keju manis", "pedas"}
 		return slices.Contains(allowedValues, value)
 	})
-	Validate.RegisterValidation("type", func(fl validator.FieldLevel) bool {
+	Validate.RegisterValidation("product_type", func(fl validator.FieldLevel) bool {
 		value := strings.ToLower(fl.Field().String())
 		return value == "keripik pangsit"
 	})
-	Validate.RegisterValidation("price", func(fl validator.FieldLevel) bool {
+	Validate.RegisterValidation("product_price", func(fl validator.FieldLevel) bool {
 		price := fl.Field().Float()
 		switch fl.Parent().FieldByName("Size").String() {
 		case "small":

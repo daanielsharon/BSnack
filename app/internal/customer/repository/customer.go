@@ -38,3 +38,11 @@ func (c *CustomerRepositoryImpl) GetCustomerByName(ctx context.Context, name str
 func (c *CustomerRepositoryImpl) CreateCustomer(ctx context.Context, customer *models.Customer) (*models.Customer, error) {
 	return customer, c.DB.WithContext(ctx).Model(&models.Customer{}).Create(customer).Error
 }
+
+func (c *CustomerRepositoryImpl) UpdateCustomerPoints(ctx context.Context, customer *models.Customer) (*models.Customer, error) {
+	return customer, c.DB.WithContext(ctx).Model(&models.Customer{}).Update("points", customer.Points).Error
+}
+
+func (c *CustomerRepositoryImpl) CreatePointRedemption(ctx context.Context, pointRedemption *models.PointRedemption) (*models.PointRedemption, error) {
+	return pointRedemption, c.DB.WithContext(ctx).Model(&models.PointRedemption{}).Create(pointRedemption).Error
+}

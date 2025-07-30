@@ -5,19 +5,19 @@ import (
 )
 
 type CreateProductResponse struct {
-	Name            string
-	Type            string
-	Flavor          string
-	Size            string
-	Price           float64
-	ManufactureDate time.Time
-	CreatedAt       time.Time
+	Name            string    `json:"name"`
+	Type            string    `json:"type"`
+	Flavor          string    `json:"flavor"`
+	Size            string    `json:"size"`
+	Price           float64   `json:"price"`
+	ManufactureDate time.Time `json:"manufacture_date"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type GetProductResponse struct {
-	Name   string
-	Type   string
-	Flavor string
-	Size   string
-	Price  float64
+	Name   string  `json:"name"`
+	Type   string  `json:"type"`
+	Flavor string  `json:"flavor"`
+	Size   string  `json:"size"`
+	Price  float64 `json:"price"`
 }

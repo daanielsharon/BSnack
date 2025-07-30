@@ -18,7 +18,10 @@ func Routes(router Router) http.Handler {
 
 	r.Route("/customers", func(r chi.Router) {
 		r.Get("/", router.CustomerHandler.GetCustomers)
-		r.Get("/{name}", router.CustomerHandler.GetCustomerByName)
+		r.Route("/{name}", func(r chi.Router) {
+			r.Get("/", router.CustomerHandler.GetCustomerByName)
+			r.Post("/point-redemption", router.CustomerHandler.CreatePointRedemption)
+		})
 		r.Post("/", router.CustomerHandler.CreateCustomer)
 	})
 
@@ -31,10 +34,6 @@ func Routes(router Router) http.Handler {
 		r.Get("/", router.TransactionHandler.GetTransactions)
 		r.Get("/{id}", router.TransactionHandler.GetTransactionById)
 		r.Post("/", router.TransactionHandler.CreateTransaction)
-	})
-
-	r.Route("/points", func(r chi.Router) {
-		// r.Get("/", router.CustomerHandler.GetPoints)
 	})
 
 	return r
