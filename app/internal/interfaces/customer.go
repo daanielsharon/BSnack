@@ -19,6 +19,8 @@ type CustomerUseCase interface {
 	GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error)
 	CreateCustomer(ctx context.Context, customer *dto.CreateCustomerRequest) (*dto.CreateCustomerResponse, error)
 	CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error)
+	DeductCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error)
+	AddCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error)
 }
 
 type CustomerRepository interface {
@@ -26,5 +28,6 @@ type CustomerRepository interface {
 	GetCustomerByName(ctx context.Context, name string) (*models.Customer, error)
 	CreateCustomer(ctx context.Context, customer *models.Customer) (*models.Customer, error)
 	CreatePointRedemption(ctx context.Context, pointRedemption *models.PointRedemption) (*models.PointRedemption, error)
-	UpdateCustomerPoints(ctx context.Context, customer *models.Customer) (*models.Customer, error)
+	AddCustomerPoints(ctx context.Context, customerName string, points int) error
+	DeductCustomerPoints(ctx context.Context, customerName string, points int) error
 }

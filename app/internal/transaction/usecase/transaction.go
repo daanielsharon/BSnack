@@ -4,17 +4,23 @@ import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/transaction/dto"
+	"bsnack/app/internal/validation"
+	"math"
 
 	"context"
 )
 
 type TransactionUseCaseImpl struct {
 	transactionRepository interfaces.TransactionRepository
+	customerUseCase       interfaces.CustomerUseCase
+	productUseCase        interfaces.ProductUseCase
 }
 
-func NewTransactionUseCase(transactionRepository interfaces.TransactionRepository) interfaces.TransactionUseCase {
+func NewTransactionUseCase(transactionRepository interfaces.TransactionRepository, customerUseCase interfaces.CustomerUseCase, productUseCase interfaces.ProductUseCase) interfaces.TransactionUseCase {
 	return &TransactionUseCaseImpl{
 		transactionRepository: transactionRepository,
+		customerUseCase:       customerUseCase,
+		productUseCase:        productUseCase,
 	}
 }
 
@@ -57,6 +63,19 @@ func (t *TransactionUseCaseImpl) GetTransactionById(ctx context.Context, id stri
 }
 
 func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transaction *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, error) {
+	product, err := t.productUseCase.GetProductByName(ctx, transaction.ProductName)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := validation.ValidateProductExists(product); err != nil {
+		return nil, err
+	}
+
+	if err := validation.ValidateProductStockEnough(product, transaction.Quantity); err != nil {
+		return nil, err
+	}
+
 	convertedTransaction := &models.Transaction{
 		CustomerName:  transaction.CustomerName,
 		ProductName:   transaction.ProductName,
@@ -70,9 +89,15 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 		return nil, err
 	}
 
+	pointsAdded := math.RoundToEven(product.Price/1000) * float64(transaction.Quantity)
+	updatedCustomer, err := t.customerUseCase.AddCustomerPoint(ctx, transaction.CustomerName, int(pointsAdded))
+	if err != nil {
+		return nil, err
+	}
+
 	return &dto.CreateTransactionResponse{
 		ID:            createdTransaction.ID,
-		CustomerName:  createdTransaction.CustomerName,
+		CustomerName:  updatedCustomer.Name,
 		ProductName:   createdTransaction.ProductName,
 		ProductFlavor: createdTransaction.ProductFlavor,
 		ProductSize:   createdTransaction.ProductSize,

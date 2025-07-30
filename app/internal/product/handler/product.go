@@ -36,7 +36,7 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 
 	products, err := p.ProductUseCase.GetProductsByManufactureDate(r.Context(), manufactureDateParsed)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get products", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
@@ -63,7 +63,7 @@ func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Reques
 
 	createdProduct, err := p.ProductUseCase.CreateProduct(r.Context(), &product)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to create product", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 

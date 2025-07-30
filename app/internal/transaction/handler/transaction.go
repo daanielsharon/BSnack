@@ -22,7 +22,7 @@ func NewTransactionHandler(transactionUseCase interfaces.TransactionUseCase, pro
 func (t *TransactionHandlerImpl) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	transactions, err := t.TransactionUseCase.GetTransactions(r.Context())
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get transactions", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
@@ -33,7 +33,7 @@ func (t *TransactionHandlerImpl) GetTransactionById(w http.ResponseWriter, r *ht
 	transactionId := r.URL.Query().Get("id")
 	transaction, err := t.TransactionUseCase.GetTransactionById(r.Context(), transactionId)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get transaction", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (t *TransactionHandlerImpl) CreateTransaction(w http.ResponseWriter, r *htt
 
 	createdTransaction, err := t.TransactionUseCase.CreateTransaction(r.Context(), &transaction)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to create transaction", nil)
+		httphelper.HandleError(w, err)
 		return
 	}
 

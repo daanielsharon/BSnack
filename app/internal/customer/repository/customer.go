@@ -39,8 +39,28 @@ func (c *CustomerRepositoryImpl) CreateCustomer(ctx context.Context, customer *m
 	return customer, c.DB.WithContext(ctx).Model(&models.Customer{}).Create(customer).Error
 }
 
-func (c *CustomerRepositoryImpl) UpdateCustomerPoints(ctx context.Context, customer *models.Customer) (*models.Customer, error) {
-	return customer, c.DB.WithContext(ctx).Model(&models.Customer{}).Update("points", customer.Points).Error
+func (c *CustomerRepositoryImpl) AddCustomerPoints(ctx context.Context, customerName string, points int) error {
+	return c.DB.Transaction(func(tx *gorm.DB) error {
+		customer, err := c.GetCustomerByName(ctx, customerName)
+		if err != nil {
+			return err
+		}
+
+		customer.Points += points
+		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", points).Error
+	})
+}
+
+func (c *CustomerRepositoryImpl) DeductCustomerPoints(ctx context.Context, customerName string, points int) error {
+	return c.DB.Transaction(func(tx *gorm.DB) error {
+		customer, err := c.GetCustomerByName(ctx, customerName)
+		if err != nil {
+			return err
+		}
+
+		customer.Points -= points
+		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", points).Error
+	})
 }
 
 func (c *CustomerRepositoryImpl) CreatePointRedemption(ctx context.Context, pointRedemption *models.PointRedemption) (*models.PointRedemption, error) {

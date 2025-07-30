@@ -2,12 +2,11 @@ package usecase
 
 import (
 	"bsnack/app/internal/customer/dto"
-	"bsnack/app/internal/customer/services"
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
-	"strings"
-
+	"bsnack/app/internal/validation"
 	"context"
+	"strings"
 )
 
 type CustomerUseCaseImpl struct {
@@ -66,18 +65,34 @@ func (c *CustomerUseCaseImpl) CreateCustomer(ctx context.Context, customer *dto.
 	}, nil
 }
 
+func (c *CustomerUseCaseImpl) DeductCustomerPoint(ctx context.Context, customerName string, pointRequired int) (*dto.GetCustomerResponse, error) {
+	if err := c.customerRepository.DeductCustomerPoints(ctx, customerName, pointRequired); err != nil {
+		return nil, err
+	}
+
+	return c.GetCustomerByName(ctx, customerName)
+}
+
+func (c *CustomerUseCaseImpl) AddCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error) {
+	if err := c.customerRepository.AddCustomerPoints(ctx, customerName, points); err != nil {
+		return nil, err
+	}
+
+	return c.GetCustomerByName(ctx, customerName)
+}
+
 func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error) {
 	product, err := c.productUseCase.GetProductByName(ctx, pointRedemption.ProductName)
 	if err != nil {
 		return nil, err
 	}
 
-	err = services.ValidateProductExists(product)
+	err = validation.ValidateProductExists(product)
 	if err != nil {
 		return nil, err
 	}
 
-	err = services.ValidateProductStockEnough(product, pointRedemption.Quantity)
+	err = validation.ValidateProductStockEnough(product, pointRedemption.Quantity)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +110,7 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRe
 	}
 
 	pointRequired := sizePointMap[productSize] * pointRedemption.Quantity
-	err = services.ValidateEnoughPoint(customer.Points, pointRequired)
+	err = validation.ValidateEnoughPoint(customer.Points, pointRequired)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +130,7 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRe
 		return nil, err
 	}
 
-	updatedCustomer, err := c.customerRepository.UpdateCustomerPoints(ctx, customer)
+	updatedCustomer, err := c.DeductCustomerPoint(ctx, customer.Name, pointRequired)
 	if err != nil {
 		return nil, err
 	}
