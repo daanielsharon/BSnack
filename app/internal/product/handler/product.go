@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type ProductHandlerImpl struct {
@@ -49,6 +52,13 @@ func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Reques
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid product data", nil)
 		return
 	}
+
+	cases := cases.Title(language.Indonesian)
+
+	product.Name = cases.String(product.Name)
+	product.Type = cases.String(product.Type)
+	product.Flavor = cases.String(product.Flavor)
+	product.Size = cases.String(product.Size)
 
 	createdProduct, err := p.ProductUseCase.CreateProduct(r.Context(), &product)
 	if err != nil {
