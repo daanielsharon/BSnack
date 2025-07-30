@@ -25,6 +25,11 @@ func NewProductHandler(clientUseCase interfaces.ProductUseCase) interfaces.Produ
 
 func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter, r *http.Request) {
 	manufactureDate := r.URL.Query().Get("manufacture_date")
+	if manufactureDate == "" {
+		httphelper.JSONResponse(w, http.StatusBadRequest, "Manufacture date is required", nil)
+		return
+	}
+
 	manufactureDateParsed, err := time.Parse("2006-01-02", manufactureDate)
 	if err != nil {
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid manufacture date", nil)
@@ -33,11 +38,11 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 
 	products, err := p.ProductUseCase.GetProductsByManufactureDate(r.Context(), manufactureDateParsed)
 	if err != nil {
-		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get clients", nil)
+		httphelper.JSONResponse(w, http.StatusInternalServerError, "Failed to get products", nil)
 		return
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Clients retrieved successfully", products)
+	httphelper.JSONResponse(w, http.StatusOK, "Products retrieved successfully", products)
 }
 
 func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Request) {
