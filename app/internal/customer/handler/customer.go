@@ -3,10 +3,10 @@ package handler
 import (
 	"bsnack/app/internal/customer/dto"
 	"bsnack/app/internal/interfaces"
+	"bsnack/app/internal/shared"
 	httphelper "bsnack/app/pkg/http"
 	"bsnack/app/pkg/validation"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,7 +23,7 @@ func NewCustomerHandler(customerUseCase interfaces.CustomerUseCase) interfaces.C
 }
 
 func (c *CustomerHandlerImpl) GetCustomers(w http.ResponseWriter, r *http.Request) {
-	customers, err := c.customerUseCase.GetCustomers(r.Context())
+	customers, total, err := c.customerUseCase.GetCustomers(r.Context())
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
@@ -37,7 +37,10 @@ func (c *CustomerHandlerImpl) GetCustomers(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Customers retrieved successfully", customersResponse)
+	httphelper.JSONResponse(w, http.StatusOK, "Customers retrieved successfully", shared.PaginatedResponse[dto.GetCustomerResponse]{
+		Data:  customersResponse,
+		Total: total,
+	})
 }
 
 func (c *CustomerHandlerImpl) GetCustomerByName(w http.ResponseWriter, r *http.Request) {
@@ -81,9 +84,6 @@ func (c *CustomerHandlerImpl) CreatePointRedemption(w http.ResponseWriter, r *ht
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid point redemption data", nil)
 		return
 	}
-
-	fmt.Println("customerName", customerName)
-	fmt.Println("pointRedemption", pointRedemption)
 
 	if err := validation.Validate.Struct(pointRedemption); err != nil {
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid point redemption data", nil)

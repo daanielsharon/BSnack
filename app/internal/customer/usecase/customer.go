@@ -4,30 +4,72 @@ import (
 	"bsnack/app/internal/customer/dto"
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
+	"bsnack/app/internal/shared"
 	"bsnack/app/internal/validation"
+	"bsnack/app/pkg/cache"
 	httphelper "bsnack/app/pkg/http"
 	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type CustomerUseCaseImpl struct {
 	customerRepository interfaces.CustomerRepository
 	productUseCase     interfaces.ProductUseCase
+	redisClient        *redis.Client
 }
 
-func NewCustomerUseCase(customerRepository interfaces.CustomerRepository, productUseCase interfaces.ProductUseCase) interfaces.CustomerUseCase {
+func NewCustomerUseCase(customerRepository interfaces.CustomerRepository, productUseCase interfaces.ProductUseCase, redisClient *redis.Client) interfaces.CustomerUseCase {
 	return &CustomerUseCaseImpl{
 		customerRepository: customerRepository,
 		productUseCase:     productUseCase,
+		redisClient:        redisClient,
 	}
 }
 
-func (c *CustomerUseCaseImpl) GetCustomers(ctx context.Context) (*[]models.Customer, error) {
-	return c.customerRepository.GetCustomers(ctx)
+func (c *CustomerUseCaseImpl) GetCustomers(ctx context.Context) (*[]models.Customer, int64, error) {
+	pg := shared.GetPagination(ctx)
+	countKey := "customers:count"
+	listKey := fmt.Sprintf("customers:page=%d:limit=%d", pg.Page, pg.PerPage)
+	ttl := 5 * time.Minute
+
+	listVal, err := c.redisClient.Get(ctx, listKey).Result()
+	if err == nil {
+		var customers []models.Customer
+		err := json.Unmarshal([]byte(listVal), &customers)
+		if err == nil {
+			countVal, err := c.redisClient.Get(ctx, countKey).Result()
+			if err == nil {
+				total, _ := strconv.ParseInt(countVal, 10, 64)
+				return &customers, total, nil
+			}
+		}
+	}
+
+	customers, total, err := c.customerRepository.GetCustomers(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = cache.SetJSON(ctx, c.redisClient, listKey, *customers, ttl)
+	if err != nil {
+		log.Printf("[WARN] Failed to set cache for list in get customers handler: %v", err)
+	}
+
+	err = cache.SetCount(ctx, c.redisClient, countKey, int64(len(*customers)), ttl)
+	if err != nil {
+		log.Printf("[WARN] Failed to set cache for count in get customers handler: %v", err)
+	}
+
+	return customers, total, nil
 }
 
 func (c *CustomerUseCaseImpl) GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error) {
@@ -54,6 +96,12 @@ func (c *CustomerUseCaseImpl) CreateCustomer(ctx context.Context, customer *dto.
 	createdCustomer, err := c.customerRepository.CreateCustomer(ctx, convertedCustomer)
 	if err != nil {
 		return nil, err
+	}
+
+	customerPattern := "customers:*"
+	err = cache.DeleteRedisKeysByPattern(ctx, c.redisClient, customerPattern)
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create customer handler: %v", customerPattern, err)
 	}
 
 	return &dto.CreateCustomerResponse{
@@ -158,6 +206,18 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, custome
 
 	if err := c.productUseCase.DeductProductStock(ctx, productName, pointRedemption.Quantity); err != nil {
 		return nil, err
+	}
+
+	productPattern := fmt.Sprintf("products:*:date=%s", product.ManufactureDate)
+	err = cache.DeleteRedisKeysByPattern(ctx, c.redisClient, productPattern)
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create point redemption handler: %v", productPattern, err)
+	}
+
+	customerPattern := "customers:*"
+	err = cache.DeleteRedisKeysByPattern(ctx, c.redisClient, customerPattern)
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create point redemption handler: %v", customerPattern, err)
 	}
 
 	return &dto.CreatePointRedemptionResponse{

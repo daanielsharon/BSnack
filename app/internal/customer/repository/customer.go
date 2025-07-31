@@ -3,6 +3,7 @@ package repository
 import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
+	"bsnack/app/internal/shared"
 
 	"context"
 
@@ -17,13 +18,21 @@ func NewCustomerRepository(db *gorm.DB) interfaces.CustomerRepository {
 	return &CustomerRepositoryImpl{DB: db}
 }
 
-func (c *CustomerRepositoryImpl) GetCustomers(ctx context.Context) (*[]models.Customer, error) {
+func (c *CustomerRepositoryImpl) GetCustomers(ctx context.Context) (*[]models.Customer, int64, error) {
+	pg := shared.GetPagination(ctx)
 	var customers []models.Customer
-	err := c.DB.WithContext(ctx).Find(&customers).Error
-	if err != nil {
-		return nil, err
+	var total int64
+
+	db := c.DB.WithContext(ctx).Model(&models.Customer{})
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return &customers, nil
+
+	err := db.Offset(pg.Offset).Limit(pg.PerPage).Find(&customers).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return &customers, total, nil
 }
 
 func (c *CustomerRepositoryImpl) GetCustomerByName(ctx context.Context, name string) (*models.Customer, error) {

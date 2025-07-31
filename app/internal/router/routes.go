@@ -22,11 +22,11 @@ func NewRouter(DB *gorm.DB, redisClient *redis.Client) chi.Router {
 	r := commonrouter.New()
 
 	productRepository := product_repository.NewProductRepository(DB)
-	productUseCase := product_usecase.NewProductUseCase(productRepository)
+	productUseCase := product_usecase.NewProductUseCase(productRepository, redisClient)
 	productHandler := product_handler.NewProductHandler(productUseCase, redisClient)
 
 	customerRepository := customer_repository.NewCustomerRepository(DB)
-	customerUseCase := customer_usecase.NewCustomerUseCase(customerRepository, productUseCase)
+	customerUseCase := customer_usecase.NewCustomerUseCase(customerRepository, productUseCase, redisClient)
 	customerHandler := customer_handler.NewCustomerHandler(customerUseCase)
 
 	transactionRepository := transaction_repository.NewTransactionRepository(DB)

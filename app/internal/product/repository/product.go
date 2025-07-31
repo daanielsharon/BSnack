@@ -4,7 +4,6 @@ import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/shared"
-	"time"
 
 	"context"
 
@@ -28,7 +27,7 @@ func (p *ProductRepositoryImpl) GetProductByName(ctx context.Context, name strin
 	return product, nil
 }
 
-func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, int64, error) {
+func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate string) (*[]models.Product, int64, error) {
 	pg := shared.GetPagination(ctx)
 
 	var products []models.Product
