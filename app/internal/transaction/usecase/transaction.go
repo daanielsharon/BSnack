@@ -112,7 +112,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 		log.Printf("[WARN] Failed to delete cache for pattern %s in create transaction handler: %v", "customers:*", err)
 	}
 
-	err = cache.DeleteRedisKeysByPattern(ctx, t.redisClient, fmt.Sprintf("products:*:date=%s", product.ManufactureDate))
+	err = cache.DeleteRedisKeysByPattern(ctx, t.redisClient, fmt.Sprintf("products:*:date=%s", product.GetDBManufactureDateInCorrectFormat()))
 	if err != nil {
 		log.Printf("[WARN] Failed to delete cache for pattern %s in create transaction handler: %v", fmt.Sprintf("products:*:date=%s", product.ManufactureDate), err)
 	}

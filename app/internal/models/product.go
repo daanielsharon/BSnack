@@ -14,3 +14,8 @@ type Product struct {
 	ManufactureDate string    `gorm:"type:varchar(255);not null"`
 	CreatedAt       time.Time `gorm:"type:timestamp;not null"`
 }
+
+func (p *Product) GetDBManufactureDateInCorrectFormat() string {
+	parsedTime, _ := time.Parse(time.RFC3339, p.ManufactureDate)
+	return parsedTime.Format("2006-01-02")
+}

@@ -211,7 +211,7 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, custome
 		return nil, err
 	}
 
-	productPattern := fmt.Sprintf("products:*:date=%s", product.ManufactureDate)
+	productPattern := fmt.Sprintf("products:*:date=%s", product.GetDBManufactureDateInCorrectFormat())
 	err = cache.DeleteRedisKeysByPattern(ctx, c.redisClient, productPattern)
 	if err != nil {
 		log.Printf("[WARN] Failed to delete cache for pattern %s in create point redemption handler: %v", productPattern, err)
