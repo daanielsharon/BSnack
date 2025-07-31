@@ -89,3 +89,7 @@ app/
 ├── pkg/           # Reusable packages
 └── migrations/    # Database migrations
 ```
+
+## Postman Collection
+
+Import the Postman collection from either `Bsnack.postman_collection.json` or `Bsnack_v2.postman_collection.json`.
