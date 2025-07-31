@@ -14,7 +14,7 @@ type ProductHandler interface {
 }
 
 type ProductUseCase interface {
-	GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]dto.GetProductResponse, error)
+	GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, error)
 	CreateProduct(ctx context.Context, product *dto.CreateProductRequest) (*dto.CreateProductResponse, error)
 	GetProductByName(ctx context.Context, name string) (*models.Product, error)
 }

@@ -1,16 +1,16 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE product_type AS ENUM (
-  'keripik_pangsit'
+  'keripik pangsit'
 );
 
 CREATE TYPE product_flavor AS ENUM (
-  'jagung_bakar',
-  'rumput_laut',
+  'jagung bakar',
+  'rumput laut',
   'original',
-  'jagung_manis',
-  'keju_asin',
-  'keju_manis',
+  'jagung manis',
+  'keju asin',
+  'keju manis',
   'pedas'
 );
 

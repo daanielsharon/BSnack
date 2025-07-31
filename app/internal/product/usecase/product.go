@@ -4,9 +4,13 @@ import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/product/dto"
+	httphelper "bsnack/app/pkg/http"
+	"net/http"
 	"time"
 
 	"context"
+
+	"gorm.io/gorm"
 )
 
 type ProductUseCaseImpl struct {
@@ -20,26 +24,18 @@ func NewProductUseCase(productRepository interfaces.ProductRepository) interface
 }
 
 func (p *ProductUseCaseImpl) GetProductByName(ctx context.Context, name string) (*models.Product, error) {
-	return p.productRepository.GetProductByName(ctx, name)
-}
-
-func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]dto.GetProductResponse, error) {
-	products, err := p.productRepository.GetProductsByManufactureDate(ctx, manufactureDate)
+	product, err := p.productRepository.GetProductByName(ctx, name)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
+		}
 		return nil, err
 	}
+	return product, nil
+}
 
-	var productResponse []dto.GetProductResponse
-	for _, product := range *products {
-		productResponse = append(productResponse, dto.GetProductResponse{
-			Name:   product.Name,
-			Type:   product.Type,
-			Flavor: product.Flavor,
-			Size:   product.Size,
-			Price:  product.Price,
-		})
-	}
-	return &productResponse, nil
+func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, error) {
+	return p.productRepository.GetProductsByManufactureDate(ctx, manufactureDate)
 }
 
 func (p *ProductUseCaseImpl) CreateProduct(ctx context.Context, product *dto.CreateProductRequest) (*dto.CreateProductResponse, error) {

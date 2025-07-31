@@ -25,20 +25,8 @@ func NewCustomerUseCase(customerRepository interfaces.CustomerRepository, produc
 	}
 }
 
-func (c *CustomerUseCaseImpl) GetCustomers(ctx context.Context) (*[]dto.GetCustomerResponse, error) {
-	customers, err := c.customerRepository.GetCustomers(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var customerResponse []dto.GetCustomerResponse
-	for _, customer := range *customers {
-		customerResponse = append(customerResponse, dto.GetCustomerResponse{
-			Name:   customer.Name,
-			Points: customer.Points,
-		})
-	}
-	return &customerResponse, nil
+func (c *CustomerUseCaseImpl) GetCustomers(ctx context.Context) (*[]models.Customer, error) {
+	return c.customerRepository.GetCustomers(ctx)
 }
 
 func (c *CustomerUseCaseImpl) GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error) {

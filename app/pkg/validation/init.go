@@ -32,7 +32,8 @@ func Init() {
 	})
 	Validate.RegisterValidation("product_price", func(fl validator.FieldLevel) bool {
 		price := fl.Field().Float()
-		switch fl.Parent().FieldByName("Size").String() {
+		sizeValue := strings.ToLower(fl.Parent().FieldByName("Size").String())
+		switch sizeValue {
 		case "small":
 			return price == 10000
 		case "medium":

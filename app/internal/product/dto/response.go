@@ -10,7 +10,7 @@ type CreateProductResponse struct {
 	Flavor          string    `json:"flavor"`
 	Size            string    `json:"size"`
 	Price           float64   `json:"price"`
-	ManufactureDate time.Time `json:"manufacture_date"`
+	ManufactureDate string    `json:"manufacture_date"`
 	CreatedAt       time.Time `json:"created_at"`
 }
 

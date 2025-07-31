@@ -15,7 +15,7 @@ type CustomerHandler interface {
 }
 
 type CustomerUseCase interface {
-	GetCustomers(ctx context.Context) (*[]dto.GetCustomerResponse, error)
+	GetCustomers(ctx context.Context) (*[]models.Customer, error)
 	GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error)
 	CreateCustomer(ctx context.Context, customer *dto.CreateCustomerRequest) (*dto.CreateCustomerResponse, error)
 	CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error)

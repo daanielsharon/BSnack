@@ -11,6 +11,6 @@ type Product struct {
 	Size            string    `gorm:"type:varchar(255);not null"`
 	Price           float64   `gorm:"type:decimal(10,2);not null"`
 	Quantity        int       `gorm:"type:int;not null"`
-	ManufactureDate time.Time `gorm:"type:timestamp;not null"`
+	ManufactureDate string    `gorm:"type:varchar(255);not null"`
 	CreatedAt       time.Time `gorm:"type:timestamp;not null"`
 }
