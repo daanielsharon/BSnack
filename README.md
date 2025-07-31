@@ -2,7 +2,7 @@
 
 A high-performance API system for managing product sales and point-based rewards, built for weekly sales of crispy snacks with various flavors and sizes.
 
-## 🚀 Features
+## Features
 
 - **Product Management**
   - Add new products with details (name, size, flavor, price, manufacture date)
@@ -19,21 +19,14 @@ A high-performance API system for managing product sales and point-based rewards
   - Handle point redemptions
   - Maintain inventory levels
 
-## 🧱 Tech Stack
+## Tech Stack
 
 - **Backend**: Go 1.21+
 - **Database**: PostgreSQL 14+
 - **Cache**: Redis 7+
 - **Containerization**: Docker & Docker Compose
-- **API Documentation**: OpenAPI/Swagger (TBD)
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Go 1.21 or later
-- Docker and Docker Compose
-- Make (optional, for development)
+## Getting Started
 
 ### Environment Setup
 
@@ -62,19 +55,12 @@ A high-performance API system for managing product sales and point-based rewards
    REDIS_PORT=6379
    ```
 
-
 ### Development Commands
 
 - Start API server only:
   ```bash
   ./run.sh
   ```
-
-## 📚 API Documentation
-
-API documentation is available at `http://localhost:8080/docs` when the server is running.
-
-## 🛠 Development
 
 ### Project Structure
 
