@@ -4,24 +4,30 @@ import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/product/dto"
 	"bsnack/app/internal/shared"
+	"bsnack/app/pkg/cache"
 	httphelper "bsnack/app/pkg/http"
 	"bsnack/app/pkg/validation"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator"
+	"github.com/go-redis/redis/v8"
 )
 
 type ProductHandlerImpl struct {
 	ProductUseCase interfaces.ProductUseCase
+	RedisClient    *redis.Client
 }
 
-func NewProductHandler(productUseCase interfaces.ProductUseCase) interfaces.ProductHandler {
+func NewProductHandler(productUseCase interfaces.ProductUseCase, redisClient *redis.Client) interfaces.ProductHandler {
 	return &ProductHandlerImpl{
 		ProductUseCase: productUseCase,
+		RedisClient:    redisClient,
 	}
 }
 
@@ -36,6 +42,28 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 	if err != nil {
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid manufacture date", nil)
 		return
+	}
+
+	pg := shared.GetPagination(r.Context())
+	countKey := fmt.Sprintf("products:count:date=%s", manufactureDate)
+	listKey := fmt.Sprintf("products:page=%d:limit=%d:date=%s", pg.Page, pg.PerPage, manufactureDate)
+	ttl := 10 * time.Minute
+
+	listVal, err := p.RedisClient.Get(r.Context(), listKey).Result()
+	if err == nil {
+		var productsResponse []dto.GetProductResponse
+		err := json.Unmarshal([]byte(listVal), &productsResponse)
+		if err == nil {
+			countVal, err := p.RedisClient.Get(r.Context(), countKey).Result()
+			if err == nil {
+				total, _ := strconv.ParseInt(countVal, 10, 64)
+				httphelper.JSONResponse(w, http.StatusOK, "Products retrieved successfully", shared.PaginatedResponse[dto.GetProductResponse]{
+					Data:  productsResponse,
+					Total: total,
+				})
+				return
+			}
+		}
 	}
 
 	products, total, err := p.ProductUseCase.GetProductsByManufactureDate(r.Context(), manufactureDateParsed)
@@ -54,6 +82,17 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 			Price:    product.Price,
 			Quantity: product.Quantity,
 		}
+	}
+
+	err = cache.SetJSON(r.Context(), p.RedisClient, listKey, productsResponse, ttl)
+	if err != nil {
+		log.Printf("[WARN] Failed to set cache for list in get products by manufacture date handler: %v", err)
+		return
+	}
+	err = cache.SetCount(r.Context(), p.RedisClient, countKey, total, ttl)
+	if err != nil {
+		log.Printf("[WARN] Failed to set cache for count in get products by manufacture date handler: %v", err)
+		return
 	}
 
 	httphelper.JSONResponse(w, http.StatusOK, "Products retrieved successfully", shared.PaginatedResponse[dto.GetProductResponse]{
@@ -104,6 +143,14 @@ func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
+	}
+
+	dateStr := product.ManufactureDate
+	pattern := fmt.Sprintf("products:*:date=%s", dateStr)
+
+	err = cache.DeleteRedisKeysByPattern(r.Context(), p.RedisClient, pattern)
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create product handler: %v", pattern, err)
 	}
 
 	httphelper.JSONResponse(w, http.StatusOK, "Product created successfully", createdProduct)

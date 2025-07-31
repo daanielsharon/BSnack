@@ -65,14 +65,9 @@ A high-performance API system for managing product sales and point-based rewards
 
 ### Development Commands
 
-- Run migrations only:
-  ```bash
-  ./run.sh --migrate
-  ```
-
 - Start API server only:
   ```bash
-  ./run.sh --run
+  ./run.sh
   ```
 
 ## 📚 API Documentation
