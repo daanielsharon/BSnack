@@ -6,10 +6,8 @@ type CreateCustomerRequest struct {
 }
 
 type CreatePointRedemptionRequest struct {
-	CustomerName  string `json:"customer_name" validate:"required"`
-	ProductName   string `json:"product_name" validate:"required,product_name"`
+	ProductName   string `json:"product_name" validate:"required"`
 	ProductSize   string `json:"product_size" validate:"required,product_size"`
-	ProductType   string `json:"product_type" validate:"required,product_type"`
 	ProductFlavor string `json:"product_flavor" validate:"required,product_flavor"`
 	Quantity      int    `json:"quantity" validate:"min=1"`
 }

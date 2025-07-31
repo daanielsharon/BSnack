@@ -18,7 +18,7 @@ type CustomerUseCase interface {
 	GetCustomers(ctx context.Context) (*[]models.Customer, error)
 	GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error)
 	CreateCustomer(ctx context.Context, customer *dto.CreateCustomerRequest) (*dto.CreateCustomerResponse, error)
-	CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error)
+	CreatePointRedemption(ctx context.Context, customerName string, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error)
 	DeductCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error)
 	AddCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error)
 }

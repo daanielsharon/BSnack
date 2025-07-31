@@ -15,7 +15,6 @@ type GetCustomerResponse struct {
 type CreatePointRedemptionResponse struct {
 	ProductName   string    `json:"product_name"`
 	ProductSize   string    `json:"product_size"`
-	ProductType   string    `json:"product_type"`
 	ProductFlavor string    `json:"product_flavor"`
 	PointBefore   int       `json:"point_before"`
 	PointRequired int       `json:"point_required"`

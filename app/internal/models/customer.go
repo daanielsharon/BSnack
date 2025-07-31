@@ -12,9 +12,8 @@ type PointRedemption struct {
 	CustomerName  string    `gorm:"column:customer_name;type:varchar(255);not null"`
 	ProductName   string    `gorm:"column:product_name;type:varchar(255);not null"`
 	ProductSize   string    `gorm:"column:product_size;type:varchar(255);not null"`
-	ProductType   string    `gorm:"column:product_type;type:varchar(255);not null"`
 	ProductFlavor string    `gorm:"column:product_flavor;type:varchar(255);not null"`
 	Quantity      int       `gorm:"column:quantity;type:int;not null"`
 	PointRequired int       `gorm:"column:point_required;type:int;not null"`
-	RedeemedAt    time.Time `gorm:"column:redemmed_at;type:timestamp;not null"`
+	RedeemedAt    time.Time `gorm:"column:redeemed_at;type:timestamp;not null"`
 }

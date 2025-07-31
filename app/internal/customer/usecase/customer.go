@@ -9,6 +9,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -85,8 +86,12 @@ func (c *CustomerUseCaseImpl) AddCustomerPoint(ctx context.Context, customerName
 	return c.GetCustomerByName(ctx, customerName)
 }
 
-func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error) {
-	product, err := c.productUseCase.GetProductByName(ctx, pointRedemption.ProductName)
+func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, customerName string, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error) {
+	productName := strings.ToLower(pointRedemption.ProductName)
+	productSize := strings.ToLower(pointRedemption.ProductSize)
+	productFlavor := strings.ToLower(pointRedemption.ProductFlavor)
+
+	product, err := c.productUseCase.GetProductByName(ctx, productName)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
@@ -105,12 +110,20 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRe
 		return nil, err
 	}
 
-	customer, err := c.customerRepository.GetCustomerByName(ctx, pointRedemption.CustomerName)
+	customer, err := c.customerRepository.GetCustomerByName(ctx, customerName)
 	if err != nil {
 		return nil, err
 	}
 
-	productSize := strings.ToLower(pointRedemption.ProductSize)
+	err = validation.ValidateSameProduct(product, &models.Product{
+		Name:   productName,
+		Size:   productSize,
+		Flavor: productFlavor,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var sizePointMap = map[string]int{
 		"small":  200,
 		"medium": 300,
@@ -125,12 +138,12 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRe
 
 	convertedPointRedemption := &models.PointRedemption{
 		CustomerName:  customer.Name,
-		ProductName:   product.Name,
+		ProductName:   productName,
 		ProductSize:   productSize,
-		ProductType:   product.Type,
-		ProductFlavor: product.Flavor,
+		ProductFlavor: productFlavor,
 		Quantity:      pointRedemption.Quantity,
 		PointRequired: pointRequired,
+		RedeemedAt:    time.Now(),
 	}
 
 	createdPointRedemption, err := c.customerRepository.CreatePointRedemption(ctx, convertedPointRedemption)
@@ -144,10 +157,9 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRe
 	}
 
 	return &dto.CreatePointRedemptionResponse{
-		ProductName:   product.Name,
+		ProductName:   productName,
 		ProductSize:   productSize,
-		ProductType:   product.Type,
-		ProductFlavor: product.Flavor,
+		ProductFlavor: productFlavor,
 		PointBefore:   customer.Points,
 		PointRequired: pointRequired,
 		PointAfter:    updatedCustomer.Points,

@@ -6,6 +6,7 @@ import (
 	httphelper "bsnack/app/pkg/http"
 	"bsnack/app/pkg/validation"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -73,6 +74,7 @@ func (c *CustomerHandlerImpl) CreateCustomer(w http.ResponseWriter, r *http.Requ
 }
 
 func (c *CustomerHandlerImpl) CreatePointRedemption(w http.ResponseWriter, r *http.Request) {
+	customerName := chi.URLParam(r, "name")
 	var pointRedemption dto.CreatePointRedemptionRequest
 	err := json.NewDecoder(r.Body).Decode(&pointRedemption)
 	if err != nil {
@@ -80,12 +82,15 @@ func (c *CustomerHandlerImpl) CreatePointRedemption(w http.ResponseWriter, r *ht
 		return
 	}
 
+	fmt.Println("customerName", customerName)
+	fmt.Println("pointRedemption", pointRedemption)
+
 	if err := validation.Validate.Struct(pointRedemption); err != nil {
 		httphelper.JSONResponse(w, http.StatusBadRequest, "Invalid point redemption data", nil)
 		return
 	}
 
-	createdPointRedemption, err := c.customerUseCase.CreatePointRedemption(r.Context(), &pointRedemption)
+	createdPointRedemption, err := c.customerUseCase.CreatePointRedemption(r.Context(), customerName, &pointRedemption)
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
