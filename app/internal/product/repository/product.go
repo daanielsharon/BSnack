@@ -39,3 +39,15 @@ func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context
 func (p *ProductRepositoryImpl) CreateProduct(ctx context.Context, product *models.Product) (*models.Product, error) {
 	return product, p.DB.WithContext(ctx).Model(&models.Product{}).Create(product).Error
 }
+
+func (p *ProductRepositoryImpl) DeductProductStock(ctx context.Context, productName string, quantity int) error {
+	return p.DB.Transaction(func(tx *gorm.DB) error {
+		product, err := p.GetProductByName(ctx, productName)
+		if err != nil {
+			return err
+		}
+
+		product.Quantity -= quantity
+		return tx.Model(&models.Product{}).Where("name = ?", productName).Update("quantity", product.Quantity).Error
+	})
+}

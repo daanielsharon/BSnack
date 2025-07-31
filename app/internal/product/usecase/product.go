@@ -64,3 +64,7 @@ func (p *ProductUseCaseImpl) CreateProduct(ctx context.Context, product *dto.Cre
 		CreatedAt:       createdProduct.CreatedAt,
 	}, nil
 }
+
+func (p *ProductUseCaseImpl) DeductProductStock(ctx context.Context, productName string, quantity int) error {
+	return p.productRepository.DeductProductStock(ctx, productName, quantity)
+}

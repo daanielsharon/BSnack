@@ -46,11 +46,12 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 	productsResponse := make([]dto.GetProductResponse, len(*products))
 	for i, product := range *products {
 		productsResponse[i] = dto.GetProductResponse{
-			Name:   product.Name,
-			Type:   product.Type,
-			Flavor: product.Flavor,
-			Size:   product.Size,
-			Price:  product.Price,
+			Name:     product.Name,
+			Type:     product.Type,
+			Flavor:   product.Flavor,
+			Size:     product.Size,
+			Price:    product.Price,
+			Quantity: product.Quantity,
 		}
 	}
 

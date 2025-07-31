@@ -156,6 +156,10 @@ func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, custome
 		return nil, err
 	}
 
+	if err := c.productUseCase.DeductProductStock(ctx, productName, pointRedemption.Quantity); err != nil {
+		return nil, err
+	}
+
 	return &dto.CreatePointRedemptionResponse{
 		ProductName:   productName,
 		ProductSize:   productSize,

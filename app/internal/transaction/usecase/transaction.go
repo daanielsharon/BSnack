@@ -6,7 +6,6 @@ import (
 	"bsnack/app/internal/transaction/dto"
 	"bsnack/app/internal/validation"
 	httphelper "bsnack/app/pkg/http"
-	"fmt"
 	"math"
 	"net/http"
 	"strings"
@@ -93,11 +92,12 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 	}
 
 	pointsAdded := math.RoundToEven(product.Price/1000) * float64(transaction.Quantity)
-	fmt.Println("points", pointsAdded)
-	fmt.Println("price", product.Price)
-	fmt.Println("quantity", transaction.Quantity)
 	updatedCustomer, err := t.customerUseCase.AddCustomerPoint(ctx, transaction.CustomerName, int(pointsAdded))
 	if err != nil {
+		return nil, err
+	}
+
+	if err := t.productUseCase.DeductProductStock(ctx, transaction.ProductName, transaction.Quantity); err != nil {
 		return nil, err
 	}
 
