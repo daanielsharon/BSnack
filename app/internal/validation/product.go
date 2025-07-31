@@ -19,3 +19,10 @@ func ValidateProductStockEnough(product *models.Product, quantity int) error {
 	}
 	return nil
 }
+
+func ValidateSameProduct(product *models.Product, productInput *models.Product) error {
+	if product.Name != productInput.Name || product.Flavor != productInput.Flavor || product.Size != productInput.Size {
+		return httphelper.NewAppError(http.StatusBadRequest, "Product not found")
+	}
+	return nil
+}

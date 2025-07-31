@@ -6,6 +6,7 @@ import (
 	"bsnack/app/internal/transaction/dto"
 	"bsnack/app/internal/validation"
 	httphelper "bsnack/app/pkg/http"
+	"fmt"
 	"math"
 	"net/http"
 
@@ -61,6 +62,16 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 		return nil, err
 	}
 
+	if err := validation.ValidateSameProduct(product, &models.Product{
+		Name:   transaction.ProductName,
+		Flavor: transaction.ProductFlavor,
+		Size:   transaction.ProductSize,
+	}); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("product", product)
+
 	if err := validation.ValidateProductExists(product); err != nil {
 		return nil, err
 	}
@@ -83,6 +94,9 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 	}
 
 	pointsAdded := math.RoundToEven(product.Price/1000) * float64(transaction.Quantity)
+	fmt.Println("points", pointsAdded)
+	fmt.Println("price", product.Price)
+	fmt.Println("quantity", transaction.Quantity)
 	updatedCustomer, err := t.customerUseCase.AddCustomerPoint(ctx, transaction.CustomerName, int(pointsAdded))
 	if err != nil {
 		return nil, err

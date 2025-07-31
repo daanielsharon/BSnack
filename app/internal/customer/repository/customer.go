@@ -47,7 +47,7 @@ func (c *CustomerRepositoryImpl) AddCustomerPoints(ctx context.Context, customer
 		}
 
 		customer.Points += points
-		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", points).Error
+		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", customer.Points).Error
 	})
 }
 
@@ -59,7 +59,7 @@ func (c *CustomerRepositoryImpl) DeductCustomerPoints(ctx context.Context, custo
 		}
 
 		customer.Points -= points
-		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", points).Error
+		return tx.Model(&models.Customer{}).Where("name = ?", customerName).Update("points", customer.Points).Error
 	})
 }
 
