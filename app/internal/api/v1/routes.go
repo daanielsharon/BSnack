@@ -32,8 +32,8 @@ func Routes(router Router) http.Handler {
 
 	r.Route("/transactions", func(r chi.Router) {
 		r.Get("/", router.TransactionHandler.GetTransactions)
-		r.Get("/{id}", router.TransactionHandler.GetTransactionById)
 		r.Post("/", router.TransactionHandler.CreateTransaction)
+		r.Get("/{id}", router.TransactionHandler.GetTransactionById)
 	})
 
 	return r

@@ -28,7 +28,7 @@ func (t *TransactionRepositoryImpl) GetTransactions(ctx context.Context) (*[]mod
 
 func (t *TransactionRepositoryImpl) GetTransactionById(ctx context.Context, id string) (*models.Transaction, error) {
 	var transaction models.Transaction
-	err := t.DB.WithContext(ctx).Find(&transaction, "id = ?", id).Error
+	err := t.DB.WithContext(ctx).Where("id = ?", id).First(&transaction).Error
 	if err != nil {
 		return nil, err
 	}

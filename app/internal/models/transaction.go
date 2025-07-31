@@ -7,7 +7,7 @@ import (
 )
 
 type Transaction struct {
-	ID            uuid.UUID `gorm:"primarykey;type:uuid;not null"`
+	ID            uuid.UUID `gorm:"primarykey;type:uuid;not null;default:uuid_generate_v4()"`
 	CustomerName  string    `gorm:"type:varchar(255);not null"`
 	ProductName   string    `gorm:"type:varchar(255);not null"`
 	ProductSize   string    `gorm:"type:varchar(255);not null"`

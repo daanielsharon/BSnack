@@ -28,30 +28,16 @@ func NewTransactionUseCase(transactionRepository interfaces.TransactionRepositor
 	}
 }
 
-func (t *TransactionUseCaseImpl) GetTransactions(ctx context.Context) (*[]dto.GetTransactionResponse, error) {
-	transactions, err := t.transactionRepository.GetTransactions(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var transactionResponse []dto.GetTransactionResponse
-	for _, transaction := range *transactions {
-		transactionResponse = append(transactionResponse, dto.GetTransactionResponse{
-			ID:            transaction.ID,
-			CustomerName:  transaction.CustomerName,
-			ProductName:   transaction.ProductName,
-			ProductFlavor: transaction.ProductFlavor,
-			ProductSize:   transaction.ProductSize,
-			Quantity:      transaction.Quantity,
-			CreatedAt:     transaction.CreatedAt,
-		})
-	}
-	return &transactionResponse, nil
+func (t *TransactionUseCaseImpl) GetTransactions(ctx context.Context) (*[]models.Transaction, error) {
+	return t.transactionRepository.GetTransactions(ctx)
 }
 
 func (t *TransactionUseCaseImpl) GetTransactionById(ctx context.Context, id string) (*dto.GetTransactionResponse, error) {
 	transaction, err := t.transactionRepository.GetTransactionById(ctx, id)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Transaction not found")
+		}
 		return nil, err
 	}
 

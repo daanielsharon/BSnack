@@ -5,5 +5,5 @@ type CreateTransactionRequest struct {
 	ProductName   string `json:"product_name" validate:"required"`
 	ProductSize   string `json:"product_size" validate:"required"`
 	ProductFlavor string `json:"product_flavor" validate:"required"`
-	Quantity      int    `json:"quantity" validate:"required"`
+	Quantity      int    `json:"quantity" validate:"required,min=1"`
 }

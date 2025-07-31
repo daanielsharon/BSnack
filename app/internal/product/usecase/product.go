@@ -45,6 +45,7 @@ func (p *ProductUseCaseImpl) CreateProduct(ctx context.Context, product *dto.Cre
 		Flavor:          product.Flavor,
 		Size:            product.Size,
 		Price:           product.Price,
+		Quantity:        product.Quantity,
 		ManufactureDate: product.ManufactureDate,
 	}
 

@@ -14,7 +14,7 @@ type TransactionHandler interface {
 }
 
 type TransactionUseCase interface {
-	GetTransactions(ctx context.Context) (*[]dto.GetTransactionResponse, error)
+	GetTransactions(ctx context.Context) (*[]models.Transaction, error)
 	GetTransactionById(ctx context.Context, id string) (*dto.GetTransactionResponse, error)
 	CreateTransaction(ctx context.Context, transaction *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, error)
 }

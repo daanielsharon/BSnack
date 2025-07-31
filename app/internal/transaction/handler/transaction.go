@@ -7,6 +7,8 @@ import (
 	"bsnack/app/pkg/validation"
 	"encoding/json"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type TransactionHandlerImpl struct {
@@ -26,11 +28,29 @@ func (t *TransactionHandlerImpl) GetTransactions(w http.ResponseWriter, r *http.
 		return
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Transactions retrieved successfully", transactions)
+	transactionResponse := make([]dto.GetTransactionResponse, len(*transactions))
+	for i, transaction := range *transactions {
+		transactionResponse[i] = dto.GetTransactionResponse{
+			ID:            transaction.ID,
+			CustomerName:  transaction.CustomerName,
+			ProductName:   transaction.ProductName,
+			ProductFlavor: transaction.ProductFlavor,
+			ProductSize:   transaction.ProductSize,
+			Quantity:      transaction.Quantity,
+			CreatedAt:     transaction.CreatedAt,
+		}
+	}
+
+	httphelper.JSONResponse(w, http.StatusOK, "Transactions retrieved successfully", transactionResponse)
 }
 
 func (t *TransactionHandlerImpl) GetTransactionById(w http.ResponseWriter, r *http.Request) {
-	transactionId := r.URL.Query().Get("id")
+	transactionId := chi.URLParam(r, "id")
+	if transactionId == "" {
+		httphelper.JSONResponse(w, http.StatusBadRequest, "Transaction ID is required. Path: "+r.URL.Path, nil)
+		return
+	}
+
 	transaction, err := t.TransactionUseCase.GetTransactionById(r.Context(), transactionId)
 	if err != nil {
 		httphelper.HandleError(w, err)

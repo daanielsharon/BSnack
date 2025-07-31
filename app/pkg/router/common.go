@@ -16,8 +16,22 @@ func GetParam(r *http.Request, key string) string {
 	return chi.URLParam(r, key)
 }
 
+// DebugMiddleware logs all incoming requests
+// func DebugMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		log.Printf("\n=== New Request ===")
+// 		log.Printf("Method: %s", r.Method)
+// 		log.Printf("URL: %s", r.URL.String())
+// 		log.Printf("Path: %s", r.URL.Path)
+// 		log.Printf("Headers: %v", r.Header)
+// 		log.Printf("Query Params: %v", r.URL.Query())
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
+
 func router() chi.Router {
 	r := chi.NewRouter()
+	// r.Use(DebugMiddleware)
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
