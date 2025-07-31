@@ -33,7 +33,8 @@ CREATE TABLE products (
 
 CREATE TABLE customers (
     name TEXT NOT NULL PRIMARY KEY,
-    points INTEGER DEFAULT 0
+    points INTEGER DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE transactions (
@@ -54,5 +55,6 @@ CREATE TABLE point_redemptions (
     product_flavor product_flavor NOT NULL,
     quantity INTEGER NOT NULL,
     point_required INTEGER NOT NULL,
-    redeemed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    redeemed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

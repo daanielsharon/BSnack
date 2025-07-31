@@ -5,9 +5,13 @@ import (
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/transaction/dto"
 	"bsnack/app/internal/validation"
+	httphelper "bsnack/app/pkg/http"
 	"math"
+	"net/http"
 
 	"context"
+
+	"gorm.io/gorm"
 )
 
 type TransactionUseCaseImpl struct {
@@ -65,6 +69,9 @@ func (t *TransactionUseCaseImpl) GetTransactionById(ctx context.Context, id stri
 func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transaction *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, error) {
 	product, err := t.productUseCase.GetProductByName(ctx, transaction.ProductName)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
+		}
 		return nil, err
 	}
 

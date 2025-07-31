@@ -27,12 +27,12 @@ func (c *CustomerRepositoryImpl) GetCustomers(ctx context.Context) (*[]models.Cu
 }
 
 func (c *CustomerRepositoryImpl) GetCustomerByName(ctx context.Context, name string) (*models.Customer, error) {
-	var customer models.Customer
-	err := c.DB.WithContext(ctx).Find(&customer, "name = ?", name).Error
+	var customer *models.Customer
+	err := c.DB.WithContext(ctx).Where("name = ?", name).First(&customer).Error
 	if err != nil {
 		return nil, err
 	}
-	return &customer, nil
+	return customer, nil
 }
 
 func (c *CustomerRepositoryImpl) CreateCustomer(ctx context.Context, customer *models.Customer) (*models.Customer, error) {

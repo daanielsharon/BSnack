@@ -5,8 +5,12 @@ import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/validation"
+	httphelper "bsnack/app/pkg/http"
 	"context"
+	"net/http"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type CustomerUseCaseImpl struct {
@@ -40,8 +44,12 @@ func (c *CustomerUseCaseImpl) GetCustomers(ctx context.Context) (*[]dto.GetCusto
 func (c *CustomerUseCaseImpl) GetCustomerByName(ctx context.Context, name string) (*dto.GetCustomerResponse, error) {
 	customer, err := c.customerRepository.GetCustomerByName(ctx, name)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Customer not found")
+		}
 		return nil, err
 	}
+
 	return &dto.GetCustomerResponse{
 		Name:   customer.Name,
 		Points: customer.Points,
@@ -67,6 +75,10 @@ func (c *CustomerUseCaseImpl) CreateCustomer(ctx context.Context, customer *dto.
 
 func (c *CustomerUseCaseImpl) DeductCustomerPoint(ctx context.Context, customerName string, pointRequired int) (*dto.GetCustomerResponse, error) {
 	if err := c.customerRepository.DeductCustomerPoints(ctx, customerName, pointRequired); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Customer not found")
+		}
+
 		return nil, err
 	}
 
@@ -75,6 +87,10 @@ func (c *CustomerUseCaseImpl) DeductCustomerPoint(ctx context.Context, customerN
 
 func (c *CustomerUseCaseImpl) AddCustomerPoint(ctx context.Context, customerName string, points int) (*dto.GetCustomerResponse, error) {
 	if err := c.customerRepository.AddCustomerPoints(ctx, customerName, points); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Customer not found")
+		}
+
 		return nil, err
 	}
 
@@ -84,6 +100,10 @@ func (c *CustomerUseCaseImpl) AddCustomerPoint(ctx context.Context, customerName
 func (c *CustomerUseCaseImpl) CreatePointRedemption(ctx context.Context, pointRedemption *dto.CreatePointRedemptionRequest) (*dto.CreatePointRedemptionResponse, error) {
 	product, err := c.productUseCase.GetProductByName(ctx, pointRedemption.ProductName)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
+		}
+
 		return nil, err
 	}
 

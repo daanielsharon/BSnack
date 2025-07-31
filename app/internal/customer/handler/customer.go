@@ -7,31 +7,41 @@ import (
 	"bsnack/app/pkg/validation"
 	"encoding/json"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type CustomerHandlerImpl struct {
-	CustomerUseCase interfaces.CustomerUseCase
+	customerUseCase interfaces.CustomerUseCase
 }
 
 func NewCustomerHandler(customerUseCase interfaces.CustomerUseCase) interfaces.CustomerHandler {
 	return &CustomerHandlerImpl{
-		CustomerUseCase: customerUseCase,
+		customerUseCase: customerUseCase,
 	}
 }
 
 func (c *CustomerHandlerImpl) GetCustomers(w http.ResponseWriter, r *http.Request) {
-	customers, err := c.CustomerUseCase.GetCustomers(r.Context())
+	customers, err := c.customerUseCase.GetCustomers(r.Context())
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Customers retrieved successfully", customers)
+	customersResponse := make([]dto.GetCustomerResponse, len(*customers))
+	for i, customer := range *customers {
+		customersResponse[i] = dto.GetCustomerResponse{
+			Name:   customer.Name,
+			Points: customer.Points,
+		}
+	}
+
+	httphelper.JSONResponse(w, http.StatusOK, "Customers retrieved successfully", customersResponse)
 }
 
 func (c *CustomerHandlerImpl) GetCustomerByName(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Query().Get("name")
-	customer, err := c.CustomerUseCase.GetCustomerByName(r.Context(), name)
+	name := chi.URLParam(r, "name")
+	customer, err := c.customerUseCase.GetCustomerByName(r.Context(), name)
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
@@ -53,7 +63,7 @@ func (c *CustomerHandlerImpl) CreateCustomer(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	createdCustomer, err := c.CustomerUseCase.CreateCustomer(r.Context(), &customer)
+	createdCustomer, err := c.customerUseCase.CreateCustomer(r.Context(), &customer)
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
@@ -75,7 +85,7 @@ func (c *CustomerHandlerImpl) CreatePointRedemption(w http.ResponseWriter, r *ht
 		return
 	}
 
-	createdPointRedemption, err := c.CustomerUseCase.CreatePointRedemption(r.Context(), &pointRedemption)
+	createdPointRedemption, err := c.customerUseCase.CreatePointRedemption(r.Context(), &pointRedemption)
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
