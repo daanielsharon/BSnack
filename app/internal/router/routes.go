@@ -8,6 +8,9 @@ import (
 	product_handler "bsnack/app/internal/product/handler"
 	product_repository "bsnack/app/internal/product/repository"
 	product_usecase "bsnack/app/internal/product/usecase"
+	transaction_handler "bsnack/app/internal/transaction/handler"
+	transaction_repository "bsnack/app/internal/transaction/repository"
+	transaction_usecase "bsnack/app/internal/transaction/usecase"
 	commonrouter "bsnack/app/pkg/router"
 
 	"github.com/go-chi/chi/v5"
@@ -26,10 +29,15 @@ func NewRouter(DB *gorm.DB, redisClient *redis.Client) chi.Router {
 	customerUseCase := customer_usecase.NewCustomerUseCase(customerRepository, productUseCase)
 	customerHandler := customer_handler.NewCustomerHandler(customerUseCase)
 
+	transactionRepository := transaction_repository.NewTransactionRepository(DB)
+	transactionUseCase := transaction_usecase.NewTransactionUseCase(transactionRepository, customerUseCase, productUseCase)
+	transactionHandler := transaction_handler.NewTransactionHandler(transactionUseCase, productUseCase)
+
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/v1", v1.Routes(v1.Router{
-			CustomerHandler: customerHandler,
-			ProductHandler:  productHandler,
+			CustomerHandler:    customerHandler,
+			ProductHandler:     productHandler,
+			TransactionHandler: transactionHandler,
 		}))
 	})
 

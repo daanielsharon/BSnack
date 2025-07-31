@@ -10,16 +10,45 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func main() {
-	var dsn string
-	var port string
+func runMigration(dsn string) {
+	wd, _ := os.Getwd()
+	m, err := migrate.New(
+		"file://"+wd+"/app/migrations",
+		dsn,
+	)
+	if err != nil {
+		log.Fatalf("Migration init error: %v", err)
+	}
 
+	if err := m.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			fmt.Println("No migration needed.")
+		} else {
+			log.Fatalf("Migration failed: %v", err)
+		}
+	} else {
+		fmt.Println("Migration completed successfully.")
+	}
+}
+
+func main() {
 	envLoader.LoadEnv(".env")
 	cfg := config.LoadConfig("config.yaml")
-	dsn = common.GenerateDSN(*cfg)
-	port = cfg.Server.Port
+
+	if os.Getenv("MIGRATE") == "true" {
+		runMigration(common.GenerateDBUrl(cfg))
+		os.Exit(0)
+	}
+
+	dsn := common.GenerateDSN(cfg)
+	port := cfg.Server.Port
 
 	validation.Init()
 	DB, err := db.Connect(db.Config{
