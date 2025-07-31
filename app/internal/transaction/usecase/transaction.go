@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"strings"
 
 	"context"
 
@@ -54,7 +55,7 @@ func (t *TransactionUseCaseImpl) GetTransactionById(ctx context.Context, id stri
 }
 
 func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transaction *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, error) {
-	product, err := t.productUseCase.GetProductByName(ctx, transaction.ProductName)
+	product, err := t.productUseCase.GetProductByName(ctx, strings.ToLower(transaction.ProductName))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
@@ -63,14 +64,12 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 	}
 
 	if err := validation.ValidateSameProduct(product, &models.Product{
-		Name:   transaction.ProductName,
-		Flavor: transaction.ProductFlavor,
-		Size:   transaction.ProductSize,
+		Name:   strings.ToLower(transaction.ProductName),
+		Flavor: strings.ToLower(transaction.ProductFlavor),
+		Size:   strings.ToLower(transaction.ProductSize),
 	}); err != nil {
 		return nil, err
 	}
-
-	fmt.Println("product", product)
 
 	if err := validation.ValidateProductExists(product); err != nil {
 		return nil, err
@@ -81,10 +80,10 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 	}
 
 	convertedTransaction := &models.Transaction{
-		CustomerName:  transaction.CustomerName,
-		ProductName:   transaction.ProductName,
-		ProductFlavor: transaction.ProductFlavor,
-		ProductSize:   transaction.ProductSize,
+		CustomerName:  strings.ToLower(transaction.CustomerName),
+		ProductName:   strings.ToLower(transaction.ProductName),
+		ProductFlavor: strings.ToLower(transaction.ProductFlavor),
+		ProductSize:   strings.ToLower(transaction.ProductSize),
 		Quantity:      transaction.Quantity,
 	}
 
