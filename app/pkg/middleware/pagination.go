@@ -13,18 +13,6 @@ type Pagination struct {
 	Offset  int
 }
 
-func GetPagination(ctx context.Context) *Pagination {
-	pg, ok := ctx.Value(ctxkey.PaginationKey()).(*Pagination)
-	if !ok {
-		return &Pagination{
-			Page:    1,
-			PerPage: 10,
-			Offset:  0,
-		}
-	}
-	return pg
-}
-
 func PaginationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()

@@ -3,6 +3,7 @@ package handler
 import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/product/dto"
+	"bsnack/app/internal/shared"
 	httphelper "bsnack/app/pkg/http"
 	"bsnack/app/pkg/validation"
 	"encoding/json"
@@ -37,7 +38,7 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 		return
 	}
 
-	products, err := p.ProductUseCase.GetProductsByManufactureDate(r.Context(), manufactureDateParsed)
+	products, total, err := p.ProductUseCase.GetProductsByManufactureDate(r.Context(), manufactureDateParsed)
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
@@ -55,7 +56,10 @@ func (p *ProductHandlerImpl) GetProductsByManufactureDate(w http.ResponseWriter,
 		}
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Products retrieved successfully", productsResponse)
+	httphelper.JSONResponse(w, http.StatusOK, "Products retrieved successfully", shared.PaginatedResponse[dto.GetProductResponse]{
+		Data:  productsResponse,
+		Total: total,
+	})
 }
 
 func (p *ProductHandlerImpl) CreateProduct(w http.ResponseWriter, r *http.Request) {

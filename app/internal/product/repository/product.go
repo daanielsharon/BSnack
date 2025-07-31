@@ -3,7 +3,7 @@ package repository
 import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
-	"bsnack/app/pkg/middleware"
+	"bsnack/app/internal/shared"
 	"time"
 
 	"context"
@@ -28,22 +28,22 @@ func (p *ProductRepositoryImpl) GetProductByName(ctx context.Context, name strin
 	return product, nil
 }
 
-func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, error) {
-	pg := middleware.GetPagination(ctx)
+func (p *ProductRepositoryImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, int64, error) {
+	pg := shared.GetPagination(ctx)
 
 	var products []models.Product
 	var total int64
 
 	db := p.DB.WithContext(ctx).Model(&models.Product{})
 	if err := db.Count(&total).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	err := db.Offset(pg.Offset).Limit(pg.PerPage).Where("manufacture_date = ?", manufactureDate).Find(&products).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return &products, nil
+	return &products, total, nil
 }
 
 func (p *ProductRepositoryImpl) CreateProduct(ctx context.Context, product *models.Product) (*models.Product, error) {

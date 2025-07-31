@@ -35,7 +35,7 @@ func (p *ProductUseCaseImpl) GetProductByName(ctx context.Context, name string) 
 	return product, nil
 }
 
-func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, error) {
+func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, manufactureDate time.Time) (*[]models.Product, int64, error) {
 	return p.productRepository.GetProductsByManufactureDate(ctx, manufactureDate)
 }
 

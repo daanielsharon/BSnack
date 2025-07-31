@@ -22,3 +22,8 @@ type GetProductResponse struct {
 	Price    float64 `json:"price"`
 	Quantity int     `json:"quantity"`
 }
+
+type PaginatedResponse[T any] struct {
+	Data  []T   `json:"data"`
+	Total int64 `json:"total"`
+}
