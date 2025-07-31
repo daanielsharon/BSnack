@@ -97,7 +97,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 		return nil, err
 	}
 
-	if err := t.productUseCase.DeductProductStock(ctx, transaction.ProductName, transaction.Quantity); err != nil {
+	if err := t.productUseCase.DeductProductStock(ctx, strings.ToLower(transaction.ProductName), transaction.Quantity); err != nil {
 		return nil, err
 	}
 

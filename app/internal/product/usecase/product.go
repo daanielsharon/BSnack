@@ -6,6 +6,7 @@ import (
 	"bsnack/app/internal/product/dto"
 	httphelper "bsnack/app/pkg/http"
 	"net/http"
+	"strings"
 	"time"
 
 	"context"
@@ -24,7 +25,7 @@ func NewProductUseCase(productRepository interfaces.ProductRepository) interface
 }
 
 func (p *ProductUseCaseImpl) GetProductByName(ctx context.Context, name string) (*models.Product, error) {
-	product, err := p.productRepository.GetProductByName(ctx, name)
+	product, err := p.productRepository.GetProductByName(ctx, strings.ToLower(name))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, httphelper.NewAppError(http.StatusNotFound, "Product not found")
