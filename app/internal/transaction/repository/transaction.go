@@ -3,6 +3,7 @@ package repository
 import (
 	"bsnack/app/internal/interfaces"
 	"bsnack/app/internal/models"
+	"bsnack/app/internal/shared"
 
 	"context"
 
@@ -17,13 +18,22 @@ func NewTransactionRepository(db *gorm.DB) interfaces.TransactionRepository {
 	return &TransactionRepositoryImpl{DB: db}
 }
 
-func (t *TransactionRepositoryImpl) GetTransactions(ctx context.Context) (*[]models.Transaction, error) {
+func (t *TransactionRepositoryImpl) GetTransactions(ctx context.Context) (*[]models.Transaction, int64, error) {
+	pg := shared.GetPagination(ctx)
 	var transactions []models.Transaction
-	err := t.DB.WithContext(ctx).Find(&transactions).Error
-	if err != nil {
-		return nil, err
+	var total int64
+
+	db := t.DB.WithContext(ctx).Model(&models.Transaction{})
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
-	return &transactions, nil
+
+	err := db.Offset(pg.Offset).Limit(pg.PerPage).Find(&transactions).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return &transactions, total, nil
 }
 
 func (t *TransactionRepositoryImpl) GetTransactionById(ctx context.Context, id string) (*models.Transaction, error) {

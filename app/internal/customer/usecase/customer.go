@@ -88,6 +88,9 @@ func (c *CustomerUseCaseImpl) GetCustomerByName(ctx context.Context, name string
 }
 
 func (c *CustomerUseCaseImpl) CreateCustomer(ctx context.Context, customer *dto.CreateCustomerRequest) (*dto.CreateCustomerResponse, error) {
+	if _, err := c.GetCustomerByName(ctx, customer.Name); err == nil {
+		return nil, httphelper.NewAppError(http.StatusConflict, "Customer already exists")
+	}
 	convertedCustomer := &models.Customer{
 		Name:   customer.Name,
 		Points: customer.Points,

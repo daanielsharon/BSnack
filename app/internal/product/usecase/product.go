@@ -81,6 +81,10 @@ func (p *ProductUseCaseImpl) GetProductsByManufactureDate(ctx context.Context, m
 }
 
 func (p *ProductUseCaseImpl) CreateProduct(ctx context.Context, product *dto.CreateProductRequest) (*dto.CreateProductResponse, error) {
+	if _, err := p.GetProductByName(ctx, product.Name); err == nil {
+		return nil, httphelper.NewAppError(http.StatusConflict, "Product already exists")
+	}
+
 	convertedProduct := &models.Product{
 		Name:            product.Name,
 		Type:            product.Type,

@@ -30,7 +30,7 @@ func NewRouter(DB *gorm.DB, redisClient *redis.Client) chi.Router {
 	customerHandler := customer_handler.NewCustomerHandler(customerUseCase)
 
 	transactionRepository := transaction_repository.NewTransactionRepository(DB)
-	transactionUseCase := transaction_usecase.NewTransactionUseCase(transactionRepository, customerUseCase, productUseCase)
+	transactionUseCase := transaction_usecase.NewTransactionUseCase(transactionRepository, customerUseCase, productUseCase, redisClient)
 	transactionHandler := transaction_handler.NewTransactionHandler(transactionUseCase, productUseCase)
 
 	r.Route("/api", func(r chi.Router) {

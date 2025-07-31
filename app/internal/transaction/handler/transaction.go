@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bsnack/app/internal/interfaces"
+	"bsnack/app/internal/shared"
 	"bsnack/app/internal/transaction/dto"
 	httphelper "bsnack/app/pkg/http"
 	"bsnack/app/pkg/validation"
@@ -22,7 +23,7 @@ func NewTransactionHandler(transactionUseCase interfaces.TransactionUseCase, pro
 }
 
 func (t *TransactionHandlerImpl) GetTransactions(w http.ResponseWriter, r *http.Request) {
-	transactions, err := t.TransactionUseCase.GetTransactions(r.Context())
+	transactions, total, err := t.TransactionUseCase.GetTransactions(r.Context())
 	if err != nil {
 		httphelper.HandleError(w, err)
 		return
@@ -41,7 +42,10 @@ func (t *TransactionHandlerImpl) GetTransactions(w http.ResponseWriter, r *http.
 		}
 	}
 
-	httphelper.JSONResponse(w, http.StatusOK, "Transactions retrieved successfully", transactionResponse)
+	httphelper.JSONResponse(w, http.StatusOK, "Transactions retrieved successfully", shared.PaginatedResponse[dto.GetTransactionResponse]{
+		Data:  transactionResponse,
+		Total: total,
+	})
 }
 
 func (t *TransactionHandlerImpl) GetTransactionById(w http.ResponseWriter, r *http.Request) {

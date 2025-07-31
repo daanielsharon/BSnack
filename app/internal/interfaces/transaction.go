@@ -14,13 +14,13 @@ type TransactionHandler interface {
 }
 
 type TransactionUseCase interface {
-	GetTransactions(ctx context.Context) (*[]models.Transaction, error)
+	GetTransactions(ctx context.Context) (*[]models.Transaction, int64, error)
 	GetTransactionById(ctx context.Context, id string) (*dto.GetTransactionResponse, error)
 	CreateTransaction(ctx context.Context, transaction *dto.CreateTransactionRequest) (*dto.CreateTransactionResponse, error)
 }
 
 type TransactionRepository interface {
-	GetTransactions(ctx context.Context) (*[]models.Transaction, error)
+	GetTransactions(ctx context.Context) (*[]models.Transaction, int64, error)
 	GetTransactionById(ctx context.Context, id string) (*models.Transaction, error)
 	CreateTransaction(ctx context.Context, transaction *models.Transaction) (*models.Transaction, error)
 }

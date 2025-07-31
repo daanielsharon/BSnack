@@ -5,13 +5,17 @@ import (
 	"bsnack/app/internal/models"
 	"bsnack/app/internal/transaction/dto"
 	"bsnack/app/internal/validation"
+	"bsnack/app/pkg/cache"
 	httphelper "bsnack/app/pkg/http"
+	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"strings"
 
 	"context"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -19,17 +23,19 @@ type TransactionUseCaseImpl struct {
 	transactionRepository interfaces.TransactionRepository
 	customerUseCase       interfaces.CustomerUseCase
 	productUseCase        interfaces.ProductUseCase
+	redisClient           *redis.Client
 }
 
-func NewTransactionUseCase(transactionRepository interfaces.TransactionRepository, customerUseCase interfaces.CustomerUseCase, productUseCase interfaces.ProductUseCase) interfaces.TransactionUseCase {
+func NewTransactionUseCase(transactionRepository interfaces.TransactionRepository, customerUseCase interfaces.CustomerUseCase, productUseCase interfaces.ProductUseCase, redisClient *redis.Client) interfaces.TransactionUseCase {
 	return &TransactionUseCaseImpl{
 		transactionRepository: transactionRepository,
 		customerUseCase:       customerUseCase,
 		productUseCase:        productUseCase,
+		redisClient:           redisClient,
 	}
 }
 
-func (t *TransactionUseCaseImpl) GetTransactions(ctx context.Context) (*[]models.Transaction, error) {
+func (t *TransactionUseCaseImpl) GetTransactions(ctx context.Context) (*[]models.Transaction, int64, error) {
 	return t.transactionRepository.GetTransactions(ctx)
 }
 
@@ -99,6 +105,16 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, transact
 
 	if err := t.productUseCase.DeductProductStock(ctx, strings.ToLower(transaction.ProductName), transaction.Quantity); err != nil {
 		return nil, err
+	}
+
+	err = cache.DeleteRedisKeysByPattern(ctx, t.redisClient, "customers:*")
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create transaction handler: %v", "customers:*", err)
+	}
+
+	err = cache.DeleteRedisKeysByPattern(ctx, t.redisClient, fmt.Sprintf("products:*:date=%s", product.ManufactureDate))
+	if err != nil {
+		log.Printf("[WARN] Failed to delete cache for pattern %s in create transaction handler: %v", fmt.Sprintf("products:*:date=%s", product.ManufactureDate), err)
 	}
 
 	return &dto.CreateTransactionResponse{
